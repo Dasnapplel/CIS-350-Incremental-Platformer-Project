@@ -9,16 +9,43 @@ def main():
     pygame.display.set_caption("cis350 incremental platformer")
     clock = pygame.time.Clock()
 
-    # a box that surrounds the player for testing
-    box = pygame.Rect(50,50,700,500)
-    border_width = 4
-    inside = box.inflate(-border_width * 2, -border_width * 2)
+    tile_size = 50 # each tile is 50 pixels
+
+    level = [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ]
+
+    # convert solid tiles into rectangles
+    platforms = []
+
+    for row in range(len(level)):
+        for column in range(len(level[row])):
+            if level[row][column] == 1:
+                platform = pygame.Rect(column * tile_size, row * tile_size, tile_size, tile_size)
+                platforms.append(platform)
 
     # player
-    player = pygame.Rect(0,0,30,30)
-    player.center = box.center
+    player = pygame.Rect(75,500,30,30)
     position = pygame.Vector2(player.topleft)
-    speed = 250 # pixels per second
+
+    speed = 250
+    gravity = 1200
+    jump_speed = 550
+    max_fall_speed = 800
+
+    vertical_velocity = 0
+    on_ground = False
 
     # standard game logic
     running = True
@@ -29,28 +56,59 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        # movement logic
+            if event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_w, pygame.K_UP) and on_ground:
+                    vertical_velocity = -jump_speed
+                    on_ground = False
+
+        # horiz movement
         keys = pygame.key.get_pressed()
-        direction = pygame.Vector2(
+        direction_x = (
             int(keys[pygame.K_d] or keys[pygame.K_RIGHT])
-            - int(keys[pygame.K_a] or keys[pygame.K_LEFT]),
-            int(keys[pygame.K_s] or keys[pygame.K_DOWN])
-            - int(keys[pygame.K_w] or keys[pygame.K_UP]),
+            - int(keys[pygame.K_a] or keys[pygame.K_LEFT])
         )
 
-        # normalize so 2 keys doesn't increase mov. speed ex:(a+s != 500)
-        if direction.length_squared() > 0:
-            direction = direction.normalize()
+        position.x += direction_x * speed * dt
+        player.x = round(position.x)
 
-        position += direction * speed * dt
+        # check horiz collisions
+        for platform in platforms:
+            if player.colliderect(platform):
+                if direction_x > 0:
+                    player.right = platform.left
+                elif direction_x < 0:
+                    player.left = platform.right
 
-        # keep the entire player inside the test box
-        position.x = max(inside.left, min(position.x, inside.right - player.width))
-        position.y = max(inside.top, min(position.y, inside.bottom - player.height))
-        player.topleft = (round(position.x), round(position.y))
+                position.x = player.x
 
+        # apply gravity
+        vertical_velocity += gravity * dt
+        vertical_velocity = min(vertical_velocity, max_fall_speed)
+
+        position.y += vertical_velocity * dt
+        player.y = round(position.y)
+        on_ground = False
+
+        # check vertical collisions
+        for platform in platforms:
+            if player.colliderect(platform):
+                if vertical_velocity > 0:
+                    # landing on top of a tile
+                    player.bottom = platform.top
+                    on_ground = True
+                elif vertical_velocity < 0:
+                    # hitting the underside of a tile
+                    player.top = platform.bottom
+
+                position.y = player.y
+                vertical_velocity = 0
+
+        # draw the map and player
         window.fill(settings.BACKGROUND)
-        pygame.draw.rect(window, (0,0,0), box, border_width)
+
+        for platform in platforms:
+            pygame.draw.rect(window, (0,0,0), platform)
+
         pygame.draw.rect(window, (50,100,255), player)
         pygame.display.flip()
 
