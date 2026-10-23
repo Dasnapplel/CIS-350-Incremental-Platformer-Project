@@ -1,5 +1,6 @@
 import pygame
 import settings
+import math
 
 
 def main():
@@ -86,7 +87,7 @@ def main():
         vertical_velocity = min(vertical_velocity, max_fall_speed)
 
         position.y += vertical_velocity * dt
-        player.y = round(position.y)
+        player.y = math.ceil(position.y)
         on_ground = False
 
         # check vertical collisions
