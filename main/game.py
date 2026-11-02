@@ -75,22 +75,19 @@ def main():
                     print("Dashed!")
 
         # horiz movement
-        keys = pygame.key.get_pressed()
+  
+        
         # keeps track of the horizontal direction while dashing
         if player.dash_time > 0:
-            #player.dash_offset = direction_x * player.dash_speed * dt
-            #player.position.x += player.dash_offset
-            #player.dash_time -= dt
-            #player.vertical_velocity = 0
-
             player.dash(direction_x, dt)
+            
         # normal horizontal movement when not dashing
         else:
-            # direction_x = player.on_right()
             player.position.x += direction_x * player.speed * dt
-            print(player.position.x)
+            
+
         player.player.x = round(player.position.x)
-        
+    
 
         # check horiz collisions
         for platform in platforms:
@@ -103,12 +100,8 @@ def main():
                 player.position.x = player.player.x
 
         # apply gravity
-        player.vertical_velocity += player.gravity * dt
-        player.vertical_velocity = min(player.vertical_velocity, player.max_fall_speed)
+        player.apply_gravity(dt)
 
-        player.position.y += player.vertical_velocity * dt
-        print(player.position.y)
-        player.player.y = math.ceil(player.position.y)
         if player.jumps == player.max_jumps:
             player.jumps -= 1
 

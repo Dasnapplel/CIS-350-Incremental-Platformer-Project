@@ -1,4 +1,5 @@
 import pygame
+import math
 
 class Player():
     def __init__(self, player):
@@ -19,6 +20,11 @@ class Player():
         self.jumps = 0
 
         self.vertical_velocity = 0
+
+    def get_inputs(self):
+        keys = pygame.key.get_pressed()
+        
+
 
     def jump(self):
         self.vertical_velocity = -self.jump_speed
@@ -41,6 +47,14 @@ class Player():
                     )
 
         return faced_direction
+
+    def apply_gravity(self, dt):
+        self.vertical_velocity += self.gravity * dt
+        self.vertical_velocity = min(self.vertical_velocity, self.max_fall_speed)
+        
+        self.position.y += self.vertical_velocity * dt
+        
+        self.player.y = math.ceil(self.position.y)
 
     def update(self):
         return 0
