@@ -20,4 +20,27 @@ class Player():
 
         self.vertical_velocity = 0
 
-    
+    def jump(self):
+        self.vertical_velocity = -self.jump_speed
+        self.jumps -= 1
+        print("Jumped!")
+
+    def dash(self, x, dt):
+        self.dash_offset = x * self.dash_speed * dt
+        self.position.x += self.dash_offset
+        self.dash_time -= dt
+        self.vertical_velocity = 0
+
+    def direction(self):
+        # Calculates the movement value of the direction the character is currently facing.
+        keys = pygame.key.get_pressed()
+
+        faced_direction = (
+                        int(keys[pygame.K_d] or keys[pygame.K_RIGHT])
+                        - int(keys[pygame.K_a] or keys[pygame.K_LEFT])
+                    )
+
+        return faced_direction
+
+    def update(self):
+        return 0
