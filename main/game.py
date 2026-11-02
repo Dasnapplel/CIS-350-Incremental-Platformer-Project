@@ -67,10 +67,12 @@ def main():
                 if event.key in (pygame.K_w, pygame.K_UP) and jumps > 0:
                     vertical_velocity = -jump_speed
                     jumps -= 1
+                    print("Jumped!")
 
                 if event.key in (pygame.K_LSHIFT, pygame.K_RSHIFT) and dash_cooldown <= 0 and direction_x != 0:
                     dash_cooldown = 0.5
                     dash_time = 0.2
+                    print("Dashed!")
 
         # horiz movement
         keys = pygame.key.get_pressed()
@@ -87,7 +89,9 @@ def main():
                 - int(keys[pygame.K_a] or keys[pygame.K_LEFT])
             )
             position.x += direction_x * speed * dt
+            print(position.x)
         player.x = round(position.x)
+        
 
         # check horiz collisions
         for platform in platforms:
@@ -104,6 +108,7 @@ def main():
         vertical_velocity = min(vertical_velocity, max_fall_speed)
 
         position.y += vertical_velocity * dt
+        print(position.y)
         player.y = math.ceil(position.y)
         if jumps == max_jumps:
             jumps -= 1
