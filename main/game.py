@@ -38,20 +38,6 @@ def main():
 
     # player
     player = Player(pygame.Rect(75,500,30,30))
-    # position = pygame.Vector2(player.topleft)
-
-    #speed = 250
-    #gravity = 1200
-    #jump_speed = 550
-    #max_fall_speed = 800
-    #dash_cooldown = 0
-    #dash_time = 0  # duration of the dash in seconds
-    #dash_speed = 2 * speed  # speed during the dash
-    #dash_offset = 0
-    #max_jumps = 2
-    #jumps = 0
-
-    #vertical_velocity = 0
 
     # standard game logic
     running = True
