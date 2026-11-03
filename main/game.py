@@ -79,26 +79,20 @@ def main():
         # keeps track of the horizontal direction while dashing
         if player.dash_time > 0:
             player.dash(direction_x, dt)
-            
         # normal horizontal movement when not dashing
         else:
             player.position.x += direction_x * player.speed * dt
         player.player.x = round(player.position.x)
 
-        # check horiz collisions
+        # checks for collisions and applies gravity
         player.horizontal_collision(platforms)
-
-        # apply gravity
         player.apply_gravity(dt)
         player.vertical_collision(platforms)
 
         # removes jump when the player is falling
         if player.vertical_velocity > 0 and player.jumps == player.max_jumps:
             player.jumps -= 1
-
-        # check vertical collisions
         
-
         # draw the map and player
         window.fill(settings.BACKGROUND)
 
