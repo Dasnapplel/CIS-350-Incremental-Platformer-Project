@@ -3,10 +3,10 @@ import pygame
 import settings
 
 
-class Upgrade:
+class UpgradeWindow:
     def __init__(self, points):
         self.points = points
-        self.upgrades = [["Double Jump", 100, False], ["Dash", 1000, False], ["Extra Time", 50, False], ["Speed Boost", 20, False]]
+        self.upgrades = [Upgrade("Double Jump", 100, 1), Upgrade("Dash", 1000, 1), Upgrade("Extra Time", 50, 5), Upgrade("Speed Boost", 20, 5)]
         self.upgrades_rects = [pygame.Rect(0, 0, 250, 80) for _ in self.upgrades]
 
     def draw_upgrades(self, window):
@@ -23,24 +23,36 @@ class Upgrade:
             self.upgrades_rects[i].y = y_offset
             pygame.draw.rect(window, (200,200,200), self.upgrades_rects[i])
             # adds name and purchase status to the upgrade button
-            window.blit(pygame.font.Font(None, 36).render(f"{upgrade[0]} - {upgrade[1]}", True, (0,0,0)), (self.upgrades_rects[i].x + 10, self.upgrades_rects[i].y + 5))
-            window.blit(pygame.font.Font(None, 36).render(f"Purchased: {upgrade[2]}", True, (0,0,0)), (self.upgrades_rects[i].x + 10, self.upgrades_rects[i].y + 40))
+            window.blit(pygame.font.Font(None, 36).render(f"{upgrade.name} - {upgrade.cost}", True, (0,0,0)), (self.upgrades_rects[i].x + 10, self.upgrades_rects[i].y + 5))
+            window.blit(pygame.font.Font(None, 36).render(f"Current Level: {upgrade.current_level}", True, (0,0,0)), (self.upgrades_rects[i].x + 10, self.upgrades_rects[i].y + 40))
             x_offset += 400
             if y_count % 2 == 1:
                 y_offset += 100
             y_count += 1
 
-    def on_click(self):
+    def purchase(self):
         # checks for clicks on the upgrade buttons and purchases if possible
         for i, upgrade in enumerate(self.upgrades):
             if self.upgrades_rects[i].collidepoint(pygame.mouse.get_pos()):
-                if not upgrade[2] and self.points >= upgrade[1]:
-                    self.points -= upgrade[1]
-                    self.upgrades[i][2] = True
+                if upgrade.current_level < upgrade.max_level and self.points >= upgrade.cost:
+                    self.points -= upgrade.cost
+                    upgrade.level_up()
+
+class Upgrade:
+    def __init__(self, name, cost, max_level):
+        self.name = name
+        self.cost = cost
+        self.max_level = max_level
+        self.current_level = 0
+
+    def level_up(self):
+        if self.current_level < self.max_level:
+            self.current_level += 1
+
 
 if __name__ == "__main__":
     pygame.init()
-    upgrade = Upgrade(100000)
+    upgrade = UpgradeWindow(100000)
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     pygame.display.flip()
     running = True
@@ -49,7 +61,7 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                upgrade.on_click()
+                upgrade.purchase()
 
         window.fill(settings.BACKGROUND)
         upgrade.draw_upgrades(window)

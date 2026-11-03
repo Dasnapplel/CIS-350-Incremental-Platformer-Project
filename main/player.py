@@ -5,6 +5,7 @@ class Player():
     def __init__(self, player):
         self.player = player
         self.position = pygame.Vector2(player.topleft)
+        self.direction_x = 0
 
         self.speed = 250
         self.gravity = 1200
@@ -23,7 +24,10 @@ class Player():
 
     def get_inputs(self):
         keys = pygame.key.get_pressed()
-        
+        self.direction_x = (
+                        int(keys[pygame.K_d] or keys[pygame.K_RIGHT])
+                        - int(keys[pygame.K_a] or keys[pygame.K_LEFT])
+                    )
 
 
     def jump(self):
@@ -45,8 +49,7 @@ class Player():
                         int(keys[pygame.K_d] or keys[pygame.K_RIGHT])
                         - int(keys[pygame.K_a] or keys[pygame.K_LEFT])
                     )
-
-        return faced_direction
+        self.direction_x = faced_direction
 
     def apply_gravity(self, dt):
         self.vertical_velocity += self.gravity * dt
@@ -55,6 +58,30 @@ class Player():
         self.position.y += self.vertical_velocity * dt
         
         self.player.y = math.ceil(self.position.y)
+
+    def horizontal_collision(self, platforms):
+        for platform in platforms:
+            if self.player.colliderect(platform):
+                if self.direction_x > 0:
+                    self.player.right = platform.left
+                elif self.direction_x < 0:
+                    self.player.left = platform.right
+
+                self.position.x = self.player.x
+
+    def vertical_collision(self, platforms):
+        for platform in platforms:
+            if self.player.colliderect(platform):
+                if self.vertical_velocity > 0:
+                    # landing on top of a tile
+                    self.player.bottom = platform.top
+                    self.jumps = self.max_jumps
+                elif self.vertical_velocity < 0:
+                    # hitting the underside of a tile
+                    self.player.top = platform.bottom
+
+                self.position.y = self.player.y
+                self.vertical_velocity = 0
 
     def update(self):
         return 0

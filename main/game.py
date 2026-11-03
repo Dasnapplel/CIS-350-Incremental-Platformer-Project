@@ -59,7 +59,8 @@ def main():
         dt = min(clock.tick(settings.FPS) / 1000, 0.05)
         player.dash_cooldown -= dt
 
-        direction_x = player.direction()
+        player.direction()
+        direction_x = player.direction_x
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -75,8 +76,6 @@ def main():
                     print("Dashed!")
 
         # horiz movement
-  
-        
         # keeps track of the horizontal direction while dashing
         if player.dash_time > 0:
             player.dash(direction_x, dt)
@@ -84,40 +83,21 @@ def main():
         # normal horizontal movement when not dashing
         else:
             player.position.x += direction_x * player.speed * dt
-            
-
         player.player.x = round(player.position.x)
-    
 
         # check horiz collisions
-        for platform in platforms:
-            if player.player.colliderect(platform):
-                if direction_x > 0:
-                    player.player.right = platform.left # might mess things up
-                elif direction_x < 0:
-                    player.player.left = platform.right
-
-                player.position.x = player.player.x
+        player.horizontal_collision(platforms)
 
         # apply gravity
         player.apply_gravity(dt)
+        player.vertical_collision(platforms)
 
-        if player.jumps == player.max_jumps:
+        # removes jump when the player is falling
+        if player.vertical_velocity > 0 and player.jumps == player.max_jumps:
             player.jumps -= 1
 
         # check vertical collisions
-        for platform in platforms:
-            if player.player.colliderect(platform):
-                if player.vertical_velocity > 0:
-                    # landing on top of a tile
-                    player.player.bottom = platform.top
-                    player.jumps = player.max_jumps
-                elif player.vertical_velocity < 0:
-                    # hitting the underside of a tile
-                    player.player.top = platform.bottom
-
-                player.position.y = player.player.y
-                player.vertical_velocity = 0
+        
 
         # draw the map and player
         window.fill(settings.BACKGROUND)
