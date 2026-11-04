@@ -5,6 +5,7 @@ from player import Player
 
 def main():
     pygame.init()
+     
 
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     pygame.display.set_caption("cis350 incremental platformer")
