@@ -3,6 +3,7 @@ import sys
 import pygame
 from PIL import Image, ImageSequence
 import game
+import upgrades
 
 from button import Button
 import settings
@@ -104,7 +105,7 @@ def main_menu():
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
                     game.main()
                 if UPGRADES_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    print("upgrades")
+                    upgrades.upgrade_shop_main()
 
         pygame.display.update()
         clock.tick(settings.FPS)
