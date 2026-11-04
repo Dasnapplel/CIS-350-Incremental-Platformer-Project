@@ -49,8 +49,7 @@ class Upgrade:
         if self.current_level < self.max_level:
             self.current_level += 1
 
-
-if __name__ == "__main__":
+def main():
     pygame.init()
     upgrade = UpgradeWindow(100000)
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
@@ -68,3 +67,6 @@ if __name__ == "__main__":
         pygame.display.flip()
 
     pygame.quit()
+
+if __name__ == "__main__":
+    main()
