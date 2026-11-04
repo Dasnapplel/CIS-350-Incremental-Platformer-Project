@@ -83,9 +83,9 @@ class Upgrade(button.Button):
             else:
                 pygame.draw.rect(window, (150,150,150), tally)
 
-def upgrade_shop_main():
+def upgrade_shop_main(UpgradeWindow):
     pygame.init()
-    upgrade_shop = UpgradeWindow(100000)
+    upgrade_shop = UpgradeWindow
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     pygame.display.flip()
     running = True
@@ -103,4 +103,4 @@ def upgrade_shop_main():
         pygame.display.flip()
 
 if __name__ == "__main__":
-    upgrade_shop_main()
+    upgrade_shop_main(UpgradeWindow(100000))

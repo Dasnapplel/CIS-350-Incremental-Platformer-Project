@@ -42,7 +42,7 @@ def get_font(size):
     return pygame.font.Font(None, size)
 
 
-def main_menu():
+def main_menu(upgrade_shop):
     pygame.display.set_caption("Menu")
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     clock = pygame.time.Clock()
@@ -103,13 +103,14 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    game.main()
+                    upgrade_shop.points += game.main()
                 if UPGRADES_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    upgrades.upgrade_shop_main()
+                    upgrades.upgrade_shop_main(upgrade_shop)
 
         pygame.display.update()
         clock.tick(settings.FPS)
 
 
 if __name__ == "__main__":
-    main_menu()
+    upgrade_shop = upgrades.UpgradeWindow(0)
+    main_menu(upgrade_shop)

@@ -62,6 +62,9 @@ def main():
                     player.dash_time = 0.2
                     print("Dashed!")
 
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
         # horiz movement
         # keeps track of the horizontal direction while dashing
         if player.dash_time > 0:
@@ -89,7 +92,8 @@ def main():
         pygame.draw.rect(window, (50,100,255), player.player)
         pygame.display.flip()
 
-    pygame.quit()
+    points = player.position.x
+    return points
 
 
 if __name__ == "__main__":
