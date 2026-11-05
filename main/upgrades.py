@@ -4,6 +4,9 @@ import os
 import pygame
 import settings
 import button
+import player
+
+pygame.init()
 
 def get_asset_path(filename):
         return os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets"), filename)
@@ -12,7 +15,9 @@ class UpgradeWindow:
     def __init__(self, points):
         self.points = points
         self.background = pygame.transform.scale(pygame.image.load(get_asset_path("upgrade_shop.png")), (settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
-        self.upgrades = [("Double Jump", 100, 1), ("Dash", 1000, 1), ("Extra Time", 50, 10), ("Speed Boost", 20, 5)]
+        # Define the upgrades available in the shop as tuples of (name, cost, max_level)
+        self.upgrades = [("Speed Boost", 20, 5), ("Double Jump", 100, 1), ("Wall Jump", 500, 1), ("Dash", 1000, 1)]
+        # planned upgrades: ("Extra Time", 50, 10)
         self.create_upgrade()
         self.back_button_image = pygame.transform.scale(pygame.image.load(get_asset_path("back.png")), (100,50))
         self.back_button = button.Button(self.back_button_image, (settings.WINDOW_WIDTH//2, settings.WINDOW_HEIGHT - 50), "", pygame.font.Font(None, 36), (0,0,0), (0,0,0))
@@ -31,14 +36,23 @@ class UpgradeWindow:
         # draws every upgrade in a grid
         for upgrade in self.upgrades:
             upgrade.update(window)
-            name = pygame.font.Font(None, 36).render(upgrade.name, True, (0,0,0))
+            name = pygame.font.Font(None, 36).render(upgrade.name, True, (255, 255, 255))
             window.blit(name, name.get_rect(center=(upgrade.x_pos, upgrade.y_pos - 5)))
             upgrade.draw_tallies((upgrade.x_pos, upgrade.y_pos + 20), window)
+
             # Draws cost of the upgrade
-            cost_text = pygame.font.Font(None, 22).render(f"{upgrade.cost}", True, (255, 215, 0))
+            if upgrade.current_level < upgrade.max_level:
+                cost_text = pygame.font.Font(None, 22).render(f"{upgrade.cost}", True, (255, 215, 0))
+            else:
+                cost_text = pygame.font.Font(None, 18).render("MAX", True, (255, 0, 0))
             window.blit(cost_text, cost_text.get_rect(right = upgrade.rect.right -14, centery = upgrade.y_pos + 30))
             # Draws the back button
             self.back_button.update(window)
+
+    def upgrade_level(self, upgrade_name):
+        for upgrade in self.upgrades:
+            if upgrade.name == upgrade_name:
+                return upgrade.current_level
             
 
     def purchase(self, position):
@@ -48,6 +62,7 @@ class UpgradeWindow:
                 if upgrade.current_level < upgrade.max_level and self.points >= upgrade.cost:
                     self.points -= upgrade.cost
                     upgrade.level_up()
+                    return upgrade
 
     def create_upgrade(self):
         for i, upgrade in enumerate(self.upgrades):
@@ -64,6 +79,7 @@ class Upgrade(button.Button):
         self.current_level = 0
 
     def scale(self, scale):
+        # Resizes the upgrade button image based on the given scale factor
         self.image = pygame.transform.scale(self.image, (200*scale, 100*scale))
 
     def level_up(self):
@@ -83,9 +99,8 @@ class Upgrade(button.Button):
             else:
                 pygame.draw.rect(window, (150,150,150), tally)
 
-def upgrade_shop_main():
-    pygame.init()
-    upgrade_shop = UpgradeWindow(100000)
+def upgrade_shop_main(UpgradeWindow, player):
+    upgrade_shop = UpgradeWindow
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     pygame.display.flip()
     running = True
@@ -94,7 +109,17 @@ def upgrade_shop_main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                upgrade_shop.purchase(pygame.mouse.get_pos())
+                upgrade = upgrade_shop.purchase(pygame.mouse.get_pos())
+                if upgrade:
+                    if upgrade.name == "Double Jump":
+                        player.max_jumps = 2
+                    elif upgrade.name == "Dash":
+                        player.can_dash = True
+                    elif upgrade.name == "Speed Boost":
+                        player.speed += 25
+                        upgrade.cost += 10
+                    elif upgrade.name == "Wall Jump":
+                        player.can_wall_jump = True
                 if upgrade_shop.back_button.checkForInput(pygame.mouse.get_pos()):
                     running = False
 
@@ -103,4 +128,5 @@ def upgrade_shop_main():
         pygame.display.flip()
 
 if __name__ == "__main__":
-    upgrade_shop_main()
+    player = player.Player(pygame.Rect(75,500,30,30))
+    upgrade_shop_main(UpgradeWindow(100000), player)

@@ -11,14 +11,16 @@ class Player():
         self.gravity = 1200
         self.jump_speed = 550
         self.max_fall_speed = 800
-        
+
+        self.can_dash = False
         self.dash_cooldown = 0
         self.dash_time = 0  # duration of the dash in seconds
         self.dash_speed = 4 * self.speed  # speed during the dash
         self.dash_offset = 0
             
-        self.max_jumps = 2
+        self.max_jumps = 1
         self.jumps = 0
+        self.can_wall_jump = False
 
         self.vertical_velocity = 0
 
@@ -67,6 +69,9 @@ class Player():
                 elif self.direction_x < 0:
                     self.player.left = platform.right
 
+                if self.can_wall_jump:
+                    self.vertical_velocity = min(self.vertical_velocity, self.max_fall_speed/4)  # Reduce fall speed when colliding with a wall
+                    self.jumps = self.max_jumps
                 self.position.x = self.player.x
 
     def vertical_collision(self, platforms):

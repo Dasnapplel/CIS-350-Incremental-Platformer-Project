@@ -13,8 +13,19 @@ class Camera():
         self.camera_y = player_y - (settings.WINDOW_HEIGHT // 2)
 
 
-def main():
+class Camera():
+    def __init__(self):
+        self.camera_x = 0
+        self.camera_y = 0
+
+    def update_camera(self, player_x, player_y):
+        self.camera_x = player_x - (settings.WINDOW_WIDTH // 2)
+        self.camera_y = player_y - (settings.WINDOW_HEIGHT // 2)
+
+
+def main(player):
     pygame.init()
+
 
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     pygame.display.set_caption("cis350 incremental platformer")
@@ -25,32 +36,44 @@ def main():
 
     tile_size = 50 # each tile is 50 pixels
 
+    COIN_VALUE = 10
+    COIN_COLOR = (255,215,0)
+    PORTAL_COLOR = (160,60,220)
+
+    #0=empty,1=solid,2=coin,3=exit portal
     level = [
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ]
 
+
     # convert solid tiles into rectangles
     platforms = []
+    coins = []
+    portals = []
+    score = 0
+    score_font = pygame.font.Font(None, 28)
 
     for row in range(len(level)):
         for column in range(len(level[row])):
-            if level[row][column] == 1:
-                platform = pygame.Rect(column * tile_size, row * tile_size, tile_size, tile_size)
-                platforms.append(platform)
+            tile = pygame.Rect(column * tile_size, row * tile_size, tile_size, tile_size)
 
-    # player
-    player = Player(pygame.Rect(75,500,30,30))
+            if level[row][column] == 1:
+                platforms.append(tile)
+            elif level[row][column] == 2:
+                coins.append(tile)
+            elif level[row][column] == 3:
+                portals.append(tile)
 
     # standard game logic
     running = True
@@ -78,40 +101,62 @@ def main():
                     player.dash_time = 0.2
                     print("Dashed!")
 
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
         # horiz movement
         # keeps track of the horizontal direction while dashing
-        if player.dash_time > 0:
+        if player.dash_time > 0 and player.can_dash:
             player.dash(direction_x, dt)
         # normal horizontal movement when not dashing
         else:
             player.position.x += direction_x * player.speed * dt
         player.player.x = round(player.position.x)
 
+        # removes jump when the player is falling
+        if player.vertical_velocity > 0 and player.jumps == player.max_jumps:
+            player.jumps -= 1
+
         # checks for collisions and applies gravity
         player.horizontal_collision(platforms)
         player.apply_gravity(dt)
         player.vertical_collision(platforms)
 
-        # removes jump when the player is falling
-        if player.vertical_velocity > 0 and player.jumps == player.max_jumps:
-            player.jumps -= 1
-        
+        # remove collected coins so eaach awards points only once per run
+        for coin in coins[:]:
+            if player.player.colliderect(coin):
+                coins.remove(coin)
+                score += COIN_VALUE
+
+        for portal in portals:
+            if player.player.colliderect(portal):
+                return RunResult(score, True)
+
         # draw the map and player
         window.fill(settings.BACKGROUND)
 
+        for coin in coins:
+            pygame.draw.rect(window, COIN_COLOR, coin)
+        for portal in portals:
+            pygame.draw.rect(window, PORTAL_COLOR, portal)
         for platform in platforms:
             screen_rect = platform.move(-camera.camera_x, -camera.camera_y)
             pygame.draw.rect(window, (0,0,0), screen_rect)
 
         player_screen_rect = player.player.move((-camera.camera_x), (-camera.camera_y))
         pygame.draw.rect(window, (50,100,255), player_screen_rect)
+        score_text = score_font.render(f"Score: {score}", True, (255,255,255))
+        window.blit(score_text, (10,10))
         pygame.display.flip()
 
-    pygame.quit()
+    return RunResult(score, False)
 
+class RunResult: # this is to check whether the level was completed
+    def __init__(self, score, completed):
+        self.score = score
+        self.completed = completed
 
 if __name__ == "__main__":
-    main()
-
-
+    player = Player(pygame.Rect(75,500,30,30))
+    main(player)
 
