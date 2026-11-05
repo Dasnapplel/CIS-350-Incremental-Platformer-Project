@@ -14,7 +14,6 @@ pygame.init()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
-
 def load_gif_frames(filepath, target_size=None):
     """Load all frames of an animated GIF and convert them to Pygame surfaces."""
     pil_img = Image.open(filepath)
@@ -103,7 +102,11 @@ def main_menu(upgrade_shop):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    upgrade_shop.points += game.main()
+                    result = game.main()
+                    upgrade_shop.points += result.score
+                    if result.completed:
+                        upgrades.upgrade_shop_main(upgrade_shop)
+
                 if UPGRADES_BUTTON.checkForInput(MENU_MOUSE_POS):
                     upgrades.upgrade_shop_main(upgrade_shop)
 

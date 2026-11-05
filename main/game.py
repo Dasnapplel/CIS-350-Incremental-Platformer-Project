@@ -5,7 +5,7 @@ from player import Player
 
 def main():
     pygame.init()
-     
+
 
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     pygame.display.set_caption("cis350 incremental platformer")
@@ -13,29 +13,44 @@ def main():
 
     tile_size = 50 # each tile is 50 pixels
 
+    COIN_VALUE = 10
+    COIN_COLOR = (255,215,0)
+    PORTAL_COLOR = (160,60,220)
+
+    #0=empty,1=solid,2=coin,3=exit portal
     level = [
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ]
 
+
     # convert solid tiles into rectangles
     platforms = []
+    coins = []
+    portals = []
+    score = 0
+    score_font = pygame.font.Font(None, 28)
 
     for row in range(len(level)):
         for column in range(len(level[row])):
+            tile = pygame.Rect(column * tile_size, row * tile_size, tile_size, tile_size)
+
             if level[row][column] == 1:
-                platform = pygame.Rect(column * tile_size, row * tile_size, tile_size, tile_size)
-                platforms.append(platform)
+                platforms.append(tile)
+            elif level[row][column] == 2:
+                coins.append(tile)
+            elif level[row][column] == 3:
+                portals.append(tile)
 
     # player
     player = Player(pygame.Rect(75,500,30,30))
@@ -82,22 +97,39 @@ def main():
         # removes jump when the player is falling
         if player.vertical_velocity > 0 and player.jumps == player.max_jumps:
             player.jumps -= 1
-        
+
+        # remove collected coins so eaach awards points only once per run
+        for coin in coins[:]:
+            if player.player.colliderect(coin):
+                coins.remove(coin)
+                score += COIN_VALUE
+
+        for portal in portals:
+            if player.player.colliderect(portal):
+                return RunResult(score, True)
+
         # draw the map and player
         window.fill(settings.BACKGROUND)
 
+        for coin in coins:
+            pygame.draw.rect(window, COIN_COLOR, coin)
+        for portal in portals:
+            pygame.draw.rect(window, PORTAL_COLOR, portal)
         for platform in platforms:
             pygame.draw.rect(window, (0,0,0), platform)
 
         pygame.draw.rect(window, (50,100,255), player.player)
+        score_text = score_font.render(f"Score: {score}", True, (255,255,255))
+        window.blit(score_text, (10,10))
         pygame.display.flip()
 
-    points = player.position.x
-    return points
+    return RunResult(score, False)
 
+class RunResult: # this is to check whether the level was completed
+    def __init__(self, score, completed):
+        self.score = score
+        self.completed = completed
 
 if __name__ == "__main__":
     main()
-
-
 
