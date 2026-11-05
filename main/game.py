@@ -3,7 +3,7 @@ import settings
 import math
 from player import Player
 
-def main():
+def main(player):
     pygame.init()
 
 
@@ -52,9 +52,6 @@ def main():
             elif level[row][column] == 3:
                 portals.append(tile)
 
-    # player
-    player = Player(pygame.Rect(75,500,30,30))
-
     # standard game logic
     running = True
     while running:
@@ -82,7 +79,7 @@ def main():
 
         # horiz movement
         # keeps track of the horizontal direction while dashing
-        if player.dash_time > 0:
+        if player.dash_time > 0 and player.can_dash:
             player.dash(direction_x, dt)
         # normal horizontal movement when not dashing
         else:
@@ -131,5 +128,6 @@ class RunResult: # this is to check whether the level was completed
         self.completed = completed
 
 if __name__ == "__main__":
-    main()
+    player = Player(pygame.Rect(75,500,30,30))
+    main(player)
 

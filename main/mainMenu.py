@@ -4,6 +4,7 @@ import pygame
 from PIL import Image, ImageSequence
 import game
 import upgrades
+import player
 
 from button import Button
 import settings
@@ -41,7 +42,7 @@ def get_font(size):
     return pygame.font.Font(None, size)
 
 
-def main_menu(upgrade_shop):
+def main_menu(upgrade_shop, player):
     pygame.display.set_caption("Menu")
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     clock = pygame.time.Clock()
@@ -102,18 +103,20 @@ def main_menu(upgrade_shop):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    result = game.main()
+                    player.position = pygame.Vector2(75, 500)  # Reset player position for new run
+                    result = game.main(player)
                     upgrade_shop.points += result.score
                     if result.completed:
-                        upgrades.upgrade_shop_main(upgrade_shop)
+                        upgrades.upgrade_shop_main(upgrade_shop, player)
 
                 if UPGRADES_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    upgrades.upgrade_shop_main(upgrade_shop)
+                    upgrades.upgrade_shop_main(upgrade_shop, player)
 
         pygame.display.update()
         clock.tick(settings.FPS)
 
 
 if __name__ == "__main__":
+    player = player.Player(pygame.Rect(75,500,30,30))
     upgrade_shop = upgrades.UpgradeWindow(0)
-    main_menu(upgrade_shop)
+    main_menu(upgrade_shop, player)
