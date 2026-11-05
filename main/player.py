@@ -14,7 +14,7 @@ class Player():
         
         self.dash_cooldown = 0
         self.dash_time = 0  # duration of the dash in seconds
-        self.dash_speed = 2 * self.speed  # speed during the dash
+        self.dash_speed = 4 * self.speed  # speed during the dash
         self.dash_offset = 0
             
         self.max_jumps = 2

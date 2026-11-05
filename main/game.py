@@ -3,13 +3,25 @@ import settings
 import math
 from player import Player
 
+class Camera():
+    def __init__(self):
+        self.camera_x = 0
+        self.camera_y = 0
+
+    def update_camera(self, player_x, player_y):
+        self.camera_x = player_x - (settings.WINDOW_WIDTH // 2)
+        self.camera_y = player_y - (settings.WINDOW_HEIGHT // 2)
+
+
 def main():
     pygame.init()
-     
 
     window = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
     pygame.display.set_caption("cis350 incremental platformer")
     clock = pygame.time.Clock()
+
+    # Camera
+    camera = Camera()
 
     tile_size = 50 # each tile is 50 pixels
 
@@ -44,6 +56,10 @@ def main():
     running = True
     while running:
         dt = min(clock.tick(settings.FPS) / 1000, 0.05)
+        camera.update_camera(player.player.x, player.player.y)
+        print(f"Camera (X,Y): {camera.camera_x}, {camera.camera_y}")
+        print(f"Player (X,Y): {player.player.topleft}")
+
         player.dash_cooldown -= dt
 
         player.direction()
@@ -84,9 +100,11 @@ def main():
         window.fill(settings.BACKGROUND)
 
         for platform in platforms:
-            pygame.draw.rect(window, (0,0,0), platform)
+            screen_rect = platform.move(-camera.camera_x, -camera.camera_y)
+            pygame.draw.rect(window, (0,0,0), screen_rect)
 
-        pygame.draw.rect(window, (50,100,255), player.player)
+        player_screen_rect = player.player.move((-camera.camera_x), (-camera.camera_y))
+        pygame.draw.rect(window, (50,100,255), player_screen_rect)
         pygame.display.flip()
 
     pygame.quit()
