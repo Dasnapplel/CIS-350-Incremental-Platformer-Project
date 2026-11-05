@@ -86,14 +86,14 @@ def main(player):
             player.position.x += direction_x * player.speed * dt
         player.player.x = round(player.position.x)
 
+        # removes jump when the player is falling
+        if player.vertical_velocity > 0 and player.jumps == player.max_jumps:
+            player.jumps -= 1
+
         # checks for collisions and applies gravity
         player.horizontal_collision(platforms)
         player.apply_gravity(dt)
         player.vertical_collision(platforms)
-
-        # removes jump when the player is falling
-        if player.vertical_velocity > 0 and player.jumps == player.max_jumps:
-            player.jumps -= 1
 
         # remove collected coins so eaach awards points only once per run
         for coin in coins[:]:

@@ -5,7 +5,6 @@ class Player():
     def __init__(self, player):
         self.player = player
         self.position = pygame.Vector2(player.topleft)
-        print(f"Player initialized at position: {self.position}")
         self.direction_x = 0
 
         self.speed = 250
@@ -21,6 +20,7 @@ class Player():
             
         self.max_jumps = 1
         self.jumps = 0
+        self.can_wall_jump = False
 
         self.vertical_velocity = 0
 
@@ -69,6 +69,9 @@ class Player():
                 elif self.direction_x < 0:
                     self.player.left = platform.right
 
+                if self.can_wall_jump:
+                    self.vertical_velocity = min(self.vertical_velocity, self.max_fall_speed/4)  # Reduce fall speed when colliding with a wall
+                    self.jumps = self.max_jumps
                 self.position.x = self.player.x
 
     def vertical_collision(self, platforms):
