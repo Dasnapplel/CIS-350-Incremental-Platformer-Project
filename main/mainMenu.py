@@ -4,7 +4,7 @@ import pygame
 from PIL import Image, ImageSequence
 import game
 import upgrades
-import player
+from player import Player
 
 from button import Button
 import settings
@@ -103,7 +103,7 @@ def main_menu(upgrade_shop, player):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    player.position = pygame.Vector2(75, 500)  # Reset player position for new run
+                    player.position = pygame.Vector2(75, 1100)  # Reset player position for new run
                     result = game.main(player)
                     upgrade_shop.points += result.score
                     if result.completed:
@@ -117,6 +117,6 @@ def main_menu(upgrade_shop, player):
 
 
 if __name__ == "__main__":
-    player = player.Player(pygame.Rect(75,500,30,30))
+    player = Player(pygame.Rect(75, 1100, 30, 30))
     upgrade_shop = upgrades.UpgradeWindow(0)
     main_menu(upgrade_shop, player)

@@ -4,7 +4,7 @@ import os
 import pygame
 import settings
 import button
-import player
+from player import Player
 
 pygame.init()
 
@@ -16,7 +16,7 @@ class UpgradeWindow:
         self.points = points
         self.background = pygame.transform.scale(pygame.image.load(get_asset_path("upgrade_shop.png")), (settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
         # Define the upgrades available in the shop as tuples of (name, cost, max_level)
-        self.upgrades = [("Speed Boost", 20, 5), ("Double Jump", 100, 1), ("Wall Jump", 500, 1), ("Dash", 1000, 1)]
+        self.upgrades = [("Speed Boost", 20, 5), ("Double Jump", 100, 1), ("Wall Jump", 110, 1), ("Dash", 120, 1)]
         # planned upgrades: ("Extra Time", 50, 10)
         self.create_upgrade()
         self.back_button_image = pygame.transform.scale(pygame.image.load(get_asset_path("back.png")), (100,50))
@@ -128,5 +128,5 @@ def upgrade_shop_main(UpgradeWindow, player):
         pygame.display.flip()
 
 if __name__ == "__main__":
-    player = player.Player(pygame.Rect(75,500,30,30))
+    player = Player(pygame.Rect(75, 1100, 30, 30))
     upgrade_shop_main(UpgradeWindow(100000), player)
