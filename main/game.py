@@ -12,16 +12,10 @@ class Camera():
         self.camera_x = player_x - (settings.WINDOW_WIDTH // 2)
         self.camera_y = player_y - (settings.WINDOW_HEIGHT // 2)
 
-
-class Camera():
-    def __init__(self):
-        self.camera_x = 0
-        self.camera_y = 0
-
-    def update_camera(self, player_x, player_y):
-        self.camera_x = player_x - (settings.WINDOW_WIDTH // 2)
-        self.camera_y = player_y - (settings.WINDOW_HEIGHT // 2)
-
+class RunResult: # this is to check whether the level was completed
+    def __init__(self, score, completed):
+        self.score = score
+        self.completed = completed
 
 def main(player):
     pygame.init()
@@ -61,8 +55,12 @@ def main(player):
     platforms = []
     coins = []
     portals = []
+
     score = 0
     score_font = pygame.font.Font(None, 28)
+
+    end_time = pygame.time.get_ticks() + 20_000 # Change the number to change how long it takes for time to run out
+    time_font = pygame.font.Font(None, 28)
 
     for row in range(len(level)):
         for column in range(len(level[row])):
@@ -80,8 +78,6 @@ def main(player):
     while running:
         dt = min(clock.tick(settings.FPS) / 1000, 0.05)
         camera.update_camera(player.player.x, player.player.y)
-        print(f"Camera (X,Y): {camera.camera_x}, {camera.camera_y}")
-        print(f"Player (X,Y): {player.player.topleft}")
 
         player.dash_cooldown -= dt
 
@@ -136,25 +132,35 @@ def main(player):
         window.fill(settings.BACKGROUND)
 
         for coin in coins:
-            pygame.draw.rect(window, COIN_COLOR, coin)
+            screen_coin = coin.move(-camera.camera_x, -camera.camera_y)
+            pygame.draw.rect(window, COIN_COLOR, screen_coin)
+        
         for portal in portals:
-            pygame.draw.rect(window, PORTAL_COLOR, portal)
+            screen_portal = portal.move(-camera.camera_x, -camera.camera_y)
+            pygame.draw.rect(window, PORTAL_COLOR, screen_portal)
+            
         for platform in platforms:
             screen_rect = platform.move(-camera.camera_x, -camera.camera_y)
             pygame.draw.rect(window, (0,0,0), screen_rect)
 
         player_screen_rect = player.player.move((-camera.camera_x), (-camera.camera_y))
         pygame.draw.rect(window, (50,100,255), player_screen_rect)
-        score_text = score_font.render(f"Score: {score}", True, (255,255,255))
+
+        score_text = score_font.render(f"Score: {score}", True, ("#b68f40"))
         window.blit(score_text, (10,10))
+
+        left_ms = max(0, end_time - pygame.time.get_ticks())
+        seconds = (left_ms + 999) // 1000
+        if left_ms == 0:
+            return RunResult(score, True)
+        else:
+            time = seconds
+
+        time_text = time_font.render(f"Time: {time}", True,("#b68f40"))
+        window.blit(time_text, (10,30))
         pygame.display.flip()
 
     return RunResult(score, False)
-
-class RunResult: # this is to check whether the level was completed
-    def __init__(self, score, completed):
-        self.score = score
-        self.completed = completed
 
 if __name__ == "__main__":
     player = Player(pygame.Rect(75,500,30,30))
