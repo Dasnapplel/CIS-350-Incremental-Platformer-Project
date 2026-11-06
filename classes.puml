@@ -1,0 +1,24 @@
+@startuml classes
+set namespaceSeparator none
+class "Upgrade" as upgrades.Upgrade {
+  cost
+  current_level : int
+  image
+  max_level
+  name
+  draw_tallies(position, window)
+  level_up()
+  scale(scale)
+}
+class "UpgradeWindow" as upgrades.UpgradeWindow {
+  back_button : Button
+  back_button_image
+  background
+  points
+  upgrades : list
+  create_upgrade()
+  draw_upgrades(window)
+  purchase(position)
+  upgrade_level(upgrade_name)
+}
+@enduml
